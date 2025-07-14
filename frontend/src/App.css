@@ -1,0 +1,182 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+  padding-bottom: 6rem;
+  text-align: center;
+}
+
+body {
+  background-color: #f5f7fa;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+image {
+  max-width: 400px;
+  height: auto;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+/* Global Layout */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+/* Wochen / Tage Auswahlbereich */
+.selector-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.selector-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease-in-out;
+}
+
+.selector-item.selected {
+  border-bottom-color: blue;
+  font-weight: bold;
+}
+
+/* Bild */
+.generated-image {
+  display: block;
+  margin: 1rem auto;         /* oben und unten Abstand, horizontal zentriert */
+  max-width: 600px;
+  height: auto;
+}
+/* Responsive Typography */
+h1, h2, h4 {
+  margin: 0.5em 0;
+}
+
+@media (max-width: 600px) {
+  #root {
+    padding: 1rem;
+  }
+
+  .selector-item {
+    flex: 1 1 100%;
+    text-align: center;
+  }
+}
+
+
+.selector-option {
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: #eee;
+  color: black;
+  transition: background-color 0.3s, color 0.3s;
+  margin: 4px;
+  display: inline-block;
+}
+
+.selector-option.selected {
+  background-color: #007acc;
+  color: white;
+}
+
+.loading {
+  margin-top: 1rem;
+  color: #007acc;      /* schönes Blau */
+  font-style: italic;  /* kursiv */
+  font-weight: 500;
+}
+
+button {
+  background-color: #007acc;  /* Blau */
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: darkblue; /* Dunkleres Blau beim Hover */
+}
+
+input[type="text"], input[type="search"], input[type="email"], input[type="password"] {
+  background-color: #f0f8ff; /* Hellblauer Hintergrund */
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #003366; /* Dunkelblaue Schriftfarbe */
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="search"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+  background-color: #e0f0ff; /* Etwas dunkler bei Fokus */
+  border-color: #007bff; /* Blau bei Fokus */
+  color: #001f4d; /* Noch dunklere Schrift bei Fokus */
+  outline: none;
+}
+
+.header {
+  display: block;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.corner-image {
+  width: 60px;
+  height: auto;
+  position: fixed; /* Oder absolute, wenn du es relativ zu einem Container willst */
+  top: 10px;
+  right: 10px;
+  width: 100px;
+  z-index: 1000; /* Damit es über allem liegt */
+}
