@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-// Create an instance of axios with the base URLgit
+// Create an instance of axios with the base URL
 const api = axios.create({
-  //baseURL: "http://localhost:8001"
-  baseURL: "https://aldo597.github.io/generator/"
+  baseURL: "http://localhost:8001"
+  //baseURL: "https://aldo597.github.io/generator/api"
 });
 
 // Export the Axios instance
