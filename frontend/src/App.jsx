@@ -7,6 +7,7 @@ import PunkteSelector from './components/PunkteSelector';
 import TitelInput from './components/TitelInput';
 import './App.css';
 import logo from './grunen_logo_large.png'; // Importiere das Logo
+import api from './api'; // Importiere die API-Konfiguration
 
 function App() {
   const [wochen, setWochen] = useState([]);
@@ -24,7 +25,7 @@ function App() {
 
   useEffect(() => {
     setIsLoadingWochen(true);
-    axios.get("http://localhost:8001/wochen")
+    api.get("/wochen")
       .then(res => setWochen(res.data.wochen))
       .finally(() => setIsLoadingWochen(false));
   }, []);
@@ -36,7 +37,7 @@ function App() {
     setIsLoadingTage(true);
     setIsLoadingPunkte(true);
 
-    axios.get(`http://localhost:8001/tage?week=${week}`)
+    api.get(`/tage?week=${week}`)
       .then(res => {
         const tageListe = res.data.tage;
         setTage(tageListe);
@@ -44,7 +45,7 @@ function App() {
         let remaining = tageListe.length;
 
         tageListe.forEach(tag => {
-          axios.get(`http://localhost:8001/punkte?tag=${encodeURIComponent(tag)}`)
+          api.get(`/punkte?tag=${encodeURIComponent(tag)}`)
             .then(res => {
               setPunkteByTag(prev => ({
                 ...prev,
@@ -81,8 +82,8 @@ function App() {
       return;
     }
     setIsLoading(true);
-    axios.post(
-      'http://localhost:8001/bild',
+    api.post(
+      '/bild',
       {
         punkt: selectedPunkt,
         tag: selectedTag,
