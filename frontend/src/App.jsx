@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 
 import WochenSelector from './components/WochenSelector';
 import TageSelector from './components/TageSelector';
