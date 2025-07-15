@@ -7,7 +7,7 @@ import PunkteSelector from './components/PunkteSelector';
 import TitelInput from './components/TitelInput';
 import './App.css';
 import logo from './grunen_logo_large.png'; // Importiere das Logo
-import api from './api'; // Importiere die API-Konfiguration
+import api from '../api'; // Importiere die API-Konfiguration
 
 function App() {
   const [wochen, setWochen] = useState([]);
