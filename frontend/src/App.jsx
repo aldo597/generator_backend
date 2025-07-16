@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-
+import axios from 'axios';
 import WochenSelector from './components/WochenSelector';
 import TageSelector from './components/TageSelector';
 import PunkteSelector from './components/PunkteSelector';
@@ -24,7 +24,7 @@ function App() {
 
   useEffect(() => {
     setIsLoadingWochen(true);
-    api.get("/wochen")
+    axios.get("https://generator-vz7r.onrender.com/wochen")
       .then(res => setWochen(res.data.wochen))
       .finally(() => setIsLoadingWochen(false));
   }, []);
@@ -36,7 +36,7 @@ function App() {
     setIsLoadingTage(true);
     setIsLoadingPunkte(true);
 
-    api.get(`/tage?week=${week}`)
+    axios.get("https://generator-vz7r.onrender.com/tage?week=${week}")
       .then(res => {
         const tageListe = res.data.tage;
         setTage(tageListe);
@@ -44,7 +44,7 @@ function App() {
         let remaining = tageListe.length;
 
         tageListe.forEach(tag => {
-          api.get(`/punkte?tag=${encodeURIComponent(tag)}`)
+          axios.get("https://generator-vz7r.onrender.com/punkte?tag=${encodeURIComponent(tag)}")
             .then(res => {
               setPunkteByTag(prev => ({
                 ...prev,
@@ -81,8 +81,7 @@ function App() {
       return;
     }
     setIsLoading(true);
-    api.post(
-      '/bild',
+    axios.get("https://generator-vz7r.onrender.com/bild",
       {
         punkt: selectedPunkt,
         tag: selectedTag,
