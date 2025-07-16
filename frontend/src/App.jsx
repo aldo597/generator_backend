@@ -36,7 +36,7 @@ function App() {
     setIsLoadingTage(true);
     setIsLoadingPunkte(true);
 
-    axios.get("https://generator-vz7r.onrender.com/tage?week=${week}")
+    axios.get(`https://generator-vz7r.onrender.com/tage?week=${encodeURIComponent(week)}`)
       .then(res => {
         const tageListe = res.data.tage;
         setTage(tageListe);
@@ -44,7 +44,8 @@ function App() {
         let remaining = tageListe.length;
 
         tageListe.forEach(tag => {
-          axios.get("https://generator-vz7r.onrender.com/punkte?tag=${encodeURIComponent(tag)}")
+          axios.get(`https://generator-vz7r.onrender.com/punkte?tag=${encodeURIComponent(tag)}`)
+
             .then(res => {
               setPunkteByTag(prev => ({
                 ...prev,
@@ -81,7 +82,8 @@ function App() {
       return;
     }
     setIsLoading(true);
-    axios.get("https://generator-vz7r.onrender.com/bild",
+    axios.post(
+      "https://generator-vz7r.onrender.com/bild",
       {
         punkt: selectedPunkt,
         tag: selectedTag,
@@ -114,7 +116,7 @@ function App() {
         alt="Logo"
         className="corner-image"
       />
-      <h1>Votes – Image generator</h1>
+      <h1>VOTES – Image generator</h1>
       
     </div>
       {isLoadingWochen && <div className="loading">Loading...</div>}
