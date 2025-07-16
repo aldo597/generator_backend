@@ -15,8 +15,9 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8001", "http://localhost:5173",
-    "http://127.0.0.1:5173", "https://aldo597.github.io/generator/", "https://aldo597.github.io"],
+    #allow_origins=["http://localhost:8001", "http://localhost:5173",
+    #"http://127.0.0.1:5173", "https://aldo597.github.io/generator/", "https://aldo597.github.io"],
+    allow_origins=["*"],  # Erlaube alle Ursprünge für CORS
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -50,5 +51,3 @@ def bild_generieren(body: BildRequest):
     img_path = process_abstimmung(body.punkt, body.tag, body.titel)
     return FileResponse(img_path, media_type="image/png")
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8001)
