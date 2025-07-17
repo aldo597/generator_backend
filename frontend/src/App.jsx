@@ -116,7 +116,7 @@ function App() {
         alt="Logo"
         className="corner-image"
       />
-      <h1>VOTES – Image generator</h1>
+      <h1>Votes – Image generator</h1>
       
     </div>
       {isLoadingWochen && <div className="loading">Loading...</div>}
