@@ -1,3 +1,4 @@
+/* Root Layout */
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -6,55 +7,48 @@
   text-align: center;
 }
 
+/* Body Styling */
 body {
   background-color: #f5f7fa;
   color: #333;
   margin: 0;
   padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-size: 16px;
 }
 
-image {
-  max-width: 400px;
+/* Header Styling */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+/* Logo (Grüne Bild) */
+.corner-image {
+  width: 80px;
   height: auto;
+  position: relative;
+  top: 0;
+  right: 0;
+  margin-bottom: 0.5rem;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
+@media (min-width: 768px) {
+  .corner-image {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 100px;
+    z-index: 1000;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
-
-/* Global Layout */
+/* Container Layout */
 .container {
   display: flex;
   flex-direction: column;
@@ -62,7 +56,7 @@ image {
   justify-content: center;
 }
 
-/* Wochen / Tage Auswahlbereich */
+/* Auswahlbereiche */
 .selector-group {
   display: flex;
   flex-wrap: wrap;
@@ -71,10 +65,13 @@ image {
 }
 
 .selector-item {
+  flex: 1 1 calc(50% - 20px);
+  min-width: 120px;
   padding: 8px 16px;
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: all 0.2s ease-in-out;
+  text-align: center;
 }
 
 .selector-item.selected {
@@ -82,30 +79,26 @@ image {
   font-weight: bold;
 }
 
-/* Bild */
-.generated-image {
-  display: block;
-  margin: 1rem auto;         /* oben und unten Abstand, horizontal zentriert */
-  max-width: 600px;
-  height: auto;
-}
-/* Responsive Typography */
-h1, h2, h4 {
-  margin: 0.5em 0;
-}
+/* Kleinere Bildschirme */
+@media (max-width: 480px) {
+  .selector-item {
+    flex: 1 1 100%;
+  }
 
-@media (max-width: 600px) {
+  h1 {
+    font-size: 1.3rem;
+  }
+
+  h2 {
+    font-size: 1.1rem;
+  }
+
   #root {
     padding: 1rem;
   }
-
-  .selector-item {
-    flex: 1 1 100%;
-    text-align: center;
-  }
 }
 
-
+/* Punkte-Auswahl-Styling */
 .selector-option {
   padding: 8px 16px;
   border-radius: 6px;
@@ -122,15 +115,45 @@ h1, h2, h4 {
   color: white;
 }
 
+/* Ladeanzeige */
 .loading {
   margin-top: 1rem;
-  color: #007acc;      /* schönes Blau */
-  font-style: italic;  /* kursiv */
+  color: #007acc;
+  font-style: italic;
   font-weight: 500;
 }
 
+/* Eingabefelder */
+input[type="text"],
+input[type="search"],
+input[type="email"],
+input[type="password"] {
+  background-color: #f0f8ff;
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #003366;
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  display: block;
+}
+
+input[type="text"]:focus,
+input[type="search"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+  background-color: #e0f0ff;
+  border-color: #007bff;
+  color: #001f4d;
+  outline: none;
+}
+
+/* Buttons */
 button {
-  background-color: #007acc;  /* Blau */
+  background-color: #007acc;
   color: white;
   border: none;
   padding: 0.6rem 1.2rem;
@@ -138,45 +161,37 @@ button {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  width: 100%;
+  max-width: 300px;
+  margin: 1rem auto;
+  display: block;
 }
 
 button:hover {
-  background-color: darkblue; /* Dunkleres Blau beim Hover */
+  background-color: darkblue;
 }
 
-input[type="text"], input[type="search"], input[type="email"], input[type="password"] {
-  background-color: #f0f8ff; /* Hellblauer Hintergrund */
-  border: 1px solid #ccc;
-  padding: 0.5rem;
-  border-radius: 4px;
-  font-size: 1rem;
-  color: #003366; /* Dunkelblaue Schriftfarbe */
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-}
-
-input[type="text"]:focus,
-input[type="search"]:focus,
-input[type="email"]:focus,
-input[type="password"]:focus {
-  background-color: #e0f0ff; /* Etwas dunkler bei Fokus */
-  border-color: #007bff; /* Blau bei Fokus */
-  color: #001f4d; /* Noch dunklere Schrift bei Fokus */
-  outline: none;
-}
-
-.header {
+/* Generiertes Bild */
+.generated-image {
   display: block;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 0;
+  margin: 1rem auto;
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
 }
 
-.corner-image {
-  width: 60px;
-  height: auto;
-  position: fixed; /* Oder absolute, wenn du es relativ zu einem Container willst */
-  top: 10px;
-  right: 10px;
-  width: 100px;
-  z-index: 1000; /* Damit es über allem liegt */
+/* Typografie */
+h1, h2, h4 {
+  margin: 0.5em 0;
 }
+
+/* Optional: Karten */
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+/* Unnötige alte Styles entfernt: image, spinning logo etc. */
