@@ -40,8 +40,8 @@ url = 'https://www.europarl.europa.eu/plenary/en/votes.html?tab=votes#banner_ses
 
 
 parteireihenfolge = [
-            "CDU", "CSU", "SPD", "Grune", "FDP",
-            "Linke", "AfD", "fw", 'BSW', "Volt", "Die Partei", "Piratenpartei",
+            "Grune", "CDU", "CSU", "AfD", "SPD", "FDP",
+            "Linke", "fw", 'BSW', "Volt", "Die Partei", "Piratenpartei",
             "ODP", "Tierschutzpartei", "Sonstige"
         ]
 
@@ -119,7 +119,7 @@ def get_weeks_from_text(text):
 def tage_ausgeben(ausgewaehlte_woche, text):
         pattern = re.compile(
             re.escape(ausgewaehlte_woche) + r"\n(Strasbourg|Brussels)\n(.*?)(?=\n(?:Monday|Tuesday|Wednesday|Thursday|Friday))",
-            re.DOTALL
+            re.DOTALLxx
         )
 
         match = pattern.search(text)
@@ -444,7 +444,7 @@ def draw_block(draw, persons, label, y_offset, icon_color, font, font2, font3, l
                         name = "Warnke J.-P."
                     
                     if person['name'] == "Oetjen":
-                        name = "Oetje J.-C."
+                        name = "Oetjen J.-C."
                 logo = logos.get(person["partei"], None)
 
                 x = PADDING + col * COL_WIDTH

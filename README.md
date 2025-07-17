@@ -1,1 +1,2 @@
 Init gh-pages
+# generator

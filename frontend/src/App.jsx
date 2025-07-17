@@ -24,7 +24,7 @@ function App() {
 
   useEffect(() => {
     setIsLoadingWochen(true);
-    axios.get("https://generator-vz7r.onrender.com/wochen")
+    api.get("/wochen")
       .then(res => setWochen(res.data.wochen))
       .finally(() => setIsLoadingWochen(false));
   }, []);
@@ -36,31 +36,31 @@ function App() {
     setIsLoadingTage(true);
     setIsLoadingPunkte(true);
 
-    axios.get(`https://generator-vz7r.onrender.com/tage?week=${encodeURIComponent(week)}`)
-      .then(res => {
-        const tageListe = res.data.tage;
-        setTage(tageListe);
+    // <- fix hier:
+  api.get(`/tage?week=${encodeURIComponent(week)}`)
+    .then(res => {
+      const tageListe = res.data.tage;
+      setTage(tageListe);
 
-        let remaining = tageListe.length;
+      let remaining = tageListe.length;
 
-        tageListe.forEach(tag => {
-          axios.get(`https://generator-vz7r.onrender.com/punkte?tag=${encodeURIComponent(tag)}`)
-
-            .then(res => {
-              setPunkteByTag(prev => ({
-                ...prev,
-                [tag]: Object.entries(res.data)
-              }));
-            })
-            .catch(err => console.error("Fehler beim Laden der Punkte für Tag:", tag, err))
-            .finally(() => {
-              remaining -= 1;
-              if (remaining === 0) setIsLoadingPunkte(false);
-            });
-        });
-      })
-      .finally(() => setIsLoadingTage(false));
-  };
+      tageListe.forEach(tag => {
+        api.get(`/punkte?tag=${encodeURIComponent(tag)}`)
+          .then(res => {
+            setPunkteByTag(prev => ({
+              ...prev,
+              [tag]: Object.entries(res.data)
+            }));
+          })
+          .catch(err => console.error("Fehler beim Laden der Punkte für Tag:", tag, err))
+          .finally(() => {
+            remaining -= 1;
+            if (remaining === 0) setIsLoadingPunkte(false);
+          });
+      });
+    })
+    .finally(() => setIsLoadingTage(false));
+};
 
   const selectTag = (tag) => {
     setSelectedTag(tag);
@@ -82,8 +82,8 @@ function App() {
       return;
     }
     setIsLoading(true);
-    axios.post(
-      "https://generator-vz7r.onrender.com/bild",
+    api.post(
+      "/bild",
       {
         punkt: selectedPunkt,
         tag: selectedTag,

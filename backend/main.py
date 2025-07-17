@@ -51,3 +51,5 @@ def bild_generieren(body: BildRequest):
     img_path = process_abstimmung(body.punkt, body.tag, body.titel)
     return FileResponse(img_path, media_type="image/png")
 
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8001, log_level="info")
