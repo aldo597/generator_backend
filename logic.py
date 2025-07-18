@@ -372,6 +372,9 @@ def verarbeite_deutsche_abstimmungen(abstimmungen, deutsche_meps, parteireihenfo
                     if nachname == "Strack-zimmermann":
                         nachname = "Strack-Zimmermann"
 
+                    if nachname == "Rackete":
+                        national_party = "Linke"
+
 
                     result[entscheidung].append({
                         "name": nachname,
