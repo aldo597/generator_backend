@@ -448,6 +448,10 @@ def draw_block(img, draw, persons, label, y_offset, icon_color, font, font2, fon
                     
                     if person['name'] == "Oetjen":
                         name = "Oetjen J.-C."
+
+                    if person['name'] == "Rackete":
+                        person["partei"] = "Linke"
+                        
                 logo = logos.get(person["partei"], None)
 
                 x = PADDING + col * COL_WIDTH
