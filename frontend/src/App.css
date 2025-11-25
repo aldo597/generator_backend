@@ -128,6 +128,20 @@ body {
   font-weight: 500;
 }
 
+.register_btn {  
+  margin-left: auto;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.register_btn:hover {
+  background-color: #992d22; /* dunkleres Rot für Hover */
+}
+
 /* Eingabefelder */
 input[type="text"],
 input[type="search"],

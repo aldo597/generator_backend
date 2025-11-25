@@ -1,8 +1,11 @@
-import axios from 'axios';
+import axios from "axios";
+
+const BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const api = axios.create({
-  //baseURL: "http://localhost:8001"
-  baseURL: "https://generatorbackend-production-6bce.up.railway.app/"
+  baseURL: BASE,
+  timeout: 30000,
+  // ggf. headers: { 'Content-Type': 'application/json' }
 });
 
 export default api;
