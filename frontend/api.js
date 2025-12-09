@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const BASE = import.meta.env.VITE_API_URL 
-           || "https://<dein-projekt>.railway.app";
+           || "https://railway.com?referralCode=gKJ-9H";
 
 const api = axios.create({
   baseURL: BASE,
