@@ -109,4 +109,9 @@ def bild_generieren(body: BildRequest):
         )
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8001, log_level="info")
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 8001)),  # Railway gibt PORT automatisch vor
+        log_level="info"
+    )
