@@ -83,6 +83,10 @@ async def process_bild_async(punkt, tag, titel):
 # -----------------------------
 # Endpoints
 # -----------------------------
+@app.get("/ping")
+async def ping():
+    return {"message": "pong"}
+
 @app.get("/wochen")
 async def get_wochen():
     url = 'https://www.europarl.europa.eu/plenary/en/votes.html?tab=votes#banner_session_live'
