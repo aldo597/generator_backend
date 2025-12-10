@@ -1,61 +1,80 @@
-from fastapi import FastAPI, UploadFile, Response
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from logic import *  # <- Trenne deine Logik in eine andere Datei
-from fastapi.responses import FileResponse
+from logic import *  # Deine Logikfunktionen
 from fastapi.responses import StreamingResponse
-import uvicorn
 from pydantic import BaseModel
+import uvicorn
+import os
+import httpx  # Für asynchrone HTTP-Requests
 
+# ----------------------
+# Request Model
+# ----------------------
 class BildRequest(BaseModel):
     punkt: str
     tag: str
-    titel: str  # Auch wenn du ihn noch nicht brauchst, fürs Debugging wichtig!
+    titel: str  # Debugging / Titel
 
-
+# ----------------------
+# App erstellen & CORS
+# ----------------------
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    #allow_origins=["http://localhost:8001", "http://localhost:5173",
-    #"http://127.0.0.1:5173", "https://aldo597.github.io/generator/", "https://aldo597.github.io"],
-    allow_origins=["*"],  # Erlaube alle Ursprünge für CORS
+    allow_origins=["*"],  # Erlaube alle Domains (für Produktion besser anpassen)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# ----------------------
+# Hilfsfunktion: async Webseite laden
+# ----------------------
+async def read_website_text_async(url: str) -> str:
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        response = await client.get(url)
+        response.raise_for_status()
+        return response.text
+
+# ----------------------
+# Endpoints
+# ----------------------
 @app.get("/wochen")
-def get_wochen():
-    # Gibt alle Wochen zurück (Liste)
-    print("Hi")
-    return {"wochen": get_weeks_from_text(read_website_text('https://www.europarl.europa.eu/plenary/en/votes.html?tab=votes#banner_session_live'))}
-
-
+async def get_wochen():
+    print("Starte /wochen")
+    url = "https://www.europarl.europa.eu/plenary/en/votes.html?tab=votes#banner_session_live"
+    text = await read_website_text_async(url)
+    wochen = get_weeks_from_text(text)  # bleibt synchron
+    return {"wochen": wochen}
 
 @app.get("/tage")
-def get_tage(week: str):
+async def get_tage(week: str):
     url = "https://www.europarl.europa.eu/plenary/en/votes.html?tab=votes#banner_session_live"
-    return {"tage": tage_ausgeben(week, read_website_text(url))}
-
+    text = await read_website_text_async(url)
+    return {"tage": tage_ausgeben(week, text)}  # bleibt synchron
 
 @app.get("/punkte")
-def get_punkte(tag: str):
-    # Gibt die Abstimmungspunkte eines Tags zurück
+async def get_punkte(tag: str):
+    # PDF-Links bleiben synchron (CPU-bound)
     link, _ = pdf_finden(url, tag)
     text1 = read_pdf_with_pdfplumber(link)
     struktur = parse_inhaltsverzeichnis(text1)
     return struktur
 
 @app.post("/bild")
-def bild_generieren(body: BildRequest):
+async def bild_generieren(body: BildRequest):
     print("Titel empfangen:", body.titel)
     img_buffer = process_abstimmung(body.punkt, body.tag, body.titel)
     return StreamingResponse(img_buffer, media_type="image/png")
 
+# ----------------------
+# Server starten
+# ----------------------
 if __name__ == "__main__":
     uvicorn.run(
         app,
         host="0.0.0.0",
-        port=int(os.environ.get("PORT", 8001)),  # Railway gibt PORT automatisch vor
+        port=int(os.environ.get("PORT", 8001)),  # Railway-Port
         log_level="info"
     )
