@@ -1,3 +1,10 @@
+from fastapi import FastAPI
+app = FastAPI()
+@app.get("/ping")
+async def ping():
+    return {"message": "pong"}
+
+'''
 from fastapi import FastAPI, UploadFile, Response, Request, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
@@ -86,7 +93,7 @@ async def process_bild_async(punkt, tag, titel):
 @app.get("/ping")
 async def ping():
     return {"message": "pong"}
-'''
+
 @app.get("/wochen")
 async def get_wochen():
     url = 'https://www.europarl.europa.eu/plenary/en/votes.html?tab=votes#banner_session_live'
