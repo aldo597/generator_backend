@@ -11,6 +11,8 @@ import math
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 import random
+from difflib import SequenceMatcher
+
 
 
 MAX_WIDTH = 70
@@ -77,7 +79,6 @@ PARTEI_ABKÜRZUNGEN = {
 def read_website_text(url):
     response = requests.get(url)
 
-    print('lolololo')
     # Prüfen, ob die Seite erreichbar war
     if response.status_code == 200:
         # HTML parsen
@@ -130,17 +131,12 @@ def tage_ausgeben(ausgewaehlte_woche, text):
             # Finde alle Einzeltage in diesem Block
             tage = re.findall(r"(Monday|Tuesday|Wednesday|Thursday|Friday), \d{1,2} \w+ \d{4}", wocheninhalt)
 
-            print("Ausgewählte Woche:")
-            print(ausgewaehlte_woche)
-            print("\nTage:")
-            for tag in tage:
-                print(tag)
             return tage
         else:
             print("Woche nicht gefunden oder Format stimmt nicht.")
 
 def tage_ausgeben(ausgewaehlte_woche, text):
-
+    print("Suche nach Woche:", text)
     # Muster: finde den Textabschnitt für die ausgewählte Woche + Ort
     pattern = re.compile(
         re.escape(ausgewaehlte_woche) + r"\n(Strasbourg|Brussels)\n(.*?)(?=\n(?:Monday|Tuesday|Wednesday|Thursday|Friday), \d{1,2} \w+ 2025 -|$)",
@@ -158,11 +154,6 @@ def tage_ausgeben(ausgewaehlte_woche, text):
         # Das vorherige findall gibt nur die Wochentage zurück, wir ändern die Regex:
         tage_mit_datum = re.findall(r"(?:Monday|Tuesday|Wednesday|Thursday|Friday), \d{1,2} \w+ 2025", wocheninhalt)
 
-        print("Ausgewählte Woche:")
-        print(ausgewaehlte_woche)
-        print("\nTage mit Datum:")
-        for tag in tage_mit_datum:
-            print(tag)
         return tage_mit_datum
     else:
         print("Woche nicht gefunden.")
@@ -216,49 +207,109 @@ def read_pdf_with_pdfplumber(pdf_url):
 
     with pdfplumber.open(io.BytesIO(response.content)) as pdf:
         for i, page in enumerate(pdf.pages):
-            if i >= 7:
-                break  # Beende nach 10 Seiten
+            if i >= 15:
+                break
             text = page.extract_text()
             if text:  # Nur nicht-leere Seiten
                 all_text.append(text)
 
     return "\n\n".join(all_text)
     
-    
+def clean_abstimmungstitel(text):
+    if not text:
+        return text
+
+    # + <Zahl> finden und alles dahinter entfernen
+    m = re.search(r"\+\s*\d+", text)
+    if m:
+        text = text[:m.start()].strip()
+
+    # Entferne alles ab P10_PV(2025) oder allgemein P<num>_PV(<year>)
+    m = re.search(r"P\d+_PV\(\d{4}\)", text)
+    if m:
+        text = text[:m.start()].strip()
+
+    # Entferne trailing Dokumentnummern wie "3 PE 776.102"
+    text = re.sub(r"\bPE\s*\d{3}\.\d{3}\b.*$", "", text).strip()
+
+    # Entferne trailing Abstimmungsnummern wie "RCV_EN 3"
+    text = re.sub(r"RCV_[A-Z]{2}\s*\d+.*$", "", text).strip()
+
+    # Doppelte Leerzeichen
+    text = re.sub(r"\s+", " ", text)
+
+    return text
+
+
+
 
 def parse_inhaltsverzeichnis(text):
     struktur = defaultdict(list)
     current_key = None
+    aktueller_unterpunkt = None
+    last = 0
 
     lines = text.splitlines()
     for line in lines:
         line = line.strip()
         if not line:
             continue
+        
 
         # Entferne Punkte und Seitenzahlen am Ende
-        line = re.sub(r'\.{3,}\s*\d+$', '', line).strip()
+        lin = re.sub(r'\.{3,}\s*\d+$', '', line).strip()
+        
 
         # Hauptpunkt erkennen (z.B. "1. Some Title")
-        match_haupt = re.match(r'^(\d+)\.\s+(.*)$', line)
+        match_haupt = re.match(r'^(\d+)\.\s+(.*)$', lin)
         if match_haupt:
-            nummer = match_haupt.group(1)
+
+            nummer = int(match_haupt.group(1))
+
+            if nummer < last:
+                break
+            
+            last = nummer
             titel = match_haupt.group(2).strip()
             current_key = f"{nummer}. {titel}"
             struktur[current_key] = []
+            aktueller_unterpunkt = None
             continue
 
         # Unterpunkt erkennen (z.B. "1.1 Subtitle")
-        match_unter = re.match(r'^(\d+\.\d+)\s+(.*)$', line)
+        match_unter = re.match(r'^(\d+\.\d+)\s+(.*)$', lin)
         if match_unter and current_key:
+
             unter_titel = f"{match_unter.group(1)} {match_unter.group(2).strip()}"
             struktur[current_key].append(unter_titel)
+            aktueller_unterpunkt = len(struktur[current_key]) - 1  # Index merken
+        elif current_key is not None and aktueller_unterpunkt is not None:
+            # Zeile gehört zum vorherigen Unterpunkt → anhängen
+            struktur[current_key][aktueller_unterpunkt] += ' ' + lin
+
+    # Am Ende alles vollständig säubern
+    for key in list(struktur.keys()):
+        # Haupttitel säubern
+        clean_key = clean_abstimmungstitel(key)
+        
+        # Wenn sich der Key ändert, umbenennen
+        if clean_key != key:
+            struktur[clean_key] = struktur.pop(key)
+            key = clean_key
+
+        # Unterpunkte säubern
+        struktur[key] = [
+            clean_abstimmungstitel(unterpunkt)
+            for unterpunkt in struktur[key]
+        ]
+
+        
 
     return dict(struktur)
 
 def parse_vote_results_from_url(xml_url):
     response = requests.get(xml_url)
-    response.raise_for_status()
+    #response.raise_for_status()
     xml_content = response.content
 
     root = ET.fromstring(xml_content)
@@ -334,6 +385,24 @@ def parse_meps_from_url(xml_url):
 def normalize_partei(name):
     return PARTEI_ABKÜRZUNGEN.get(name, name)
 
+def find_best_matching_key(keys, query, threshold=0.3 ):
+    """
+    Sucht den ähnlichsten Key in einer Liste von Keys.
+    threshold = minimale Ähnlichkeit (0–1). 0.5 = 50% Match.
+    """
+    best_key = None
+    best_ratio = 0
+
+    for key in keys:
+        ratio = SequenceMatcher(None, key.lower(), query.lower()).ratio()
+        if ratio > best_ratio:
+            best_ratio = ratio
+            best_key = key
+
+    if best_ratio < threshold:
+        return None  # kein ausreichender Treffer
+    return best_key
+
 def verarbeite_deutsche_abstimmungen(abstimmungen, deutsche_meps, parteireihenfolge, punkt, abstimmungstitel):
     result = {
         "titel_abstimmung": abstimmungstitel,
@@ -343,52 +412,56 @@ def verarbeite_deutsche_abstimmungen(abstimmungen, deutsche_meps, parteireihenfo
         "not_voted": []
     }
 
-    # IDs der bereits gewerteten deutschen Abgeordneten
+    fuzzy_used = False  # neue Variable, ob Fuzzy-Matching genutzt wurde
     gewertete_ids = set()
 
-    temp = abstimmungen[punkt]
-    print(temp.keys())
+    if punkt in abstimmungen:
+        temp_key = punkt
+    else:
+        print(f"⚠️ Direkter Treffer für '{punkt}' NICHT gefunden. Starte fuzzy matching...")
+        temp_key = find_best_matching_key(list(abstimmungen.keys()), punkt)
+        fuzzy_used = True  # <- Fuzzy wurde verwendet
+
+        if temp_key is None:
+            raise KeyError(f"Keine passende Abstimmung für '{punkt}' gefunden – auch fuzzy nicht.")
+
+        print(f"👉 Fuzzy-Match gewählt: '{temp_key}'")
+
+    temp = abstimmungen[temp_key]
+
     for entscheidung in temp.keys():
         fraktion_list = temp[entscheidung]
-        print(entscheidung)
         for abgeordneter in fraktion_list:
-                mep_id = abgeordneter.get("id")
-                if mep_id in deutsche_meps:
-                    info = deutsche_meps[mep_id]
+            mep_id = abgeordneter.get("id")
+            if mep_id in deutsche_meps:
+                info = deutsche_meps[mep_id]
+                national_party = normalize_partei(info["national_political_group"])
 
-                    national_party = normalize_partei(info["national_political_group"])
+                parts = info["full_name"].split()
+                nachnamen_teile = [teil.capitalize() for teil in parts if teil.isupper()]
+                vornamen_teile = [teil.capitalize() for teil in parts if not teil.isupper()]
 
-                    parts = info["full_name"].split()
-                    nachnamen_teile = [teil.capitalize() for teil in parts if teil.isupper()]
-                    vornamen_teile = [teil.capitalize() for teil in parts if not teil.isupper()]
+                if not nachnamen_teile:
+                    nachname = parts[-1]
+                    vorname = " ".join(parts[:-1])
+                else:
+                    nachname = " ".join(nachnamen_teile)
+                    vorname = " ".join(vornamen_teile)
 
-                    if not nachnamen_teile:
-                        nachname = parts[-1]
-                        vorname = " ".join(parts[:-1])
-                    else:
-                        nachname = " ".join(nachnamen_teile)
-                        vorname = " ".join(vornamen_teile)
+                if nachname == "Strack-zimmermann":
+                    nachname = "Strack-Zimmermann"
 
-                    if nachname == "Strack-zimmermann":
-                        nachname = "Strack-Zimmermann"
+                result[entscheidung].append({
+                    "name": nachname,
+                    "vorname": vorname,
+                    "partei": national_party,
+                    "political_group": info["political_group"]
+                })
+                gewertete_ids.add(mep_id)
 
-                    if nachname == "Rackete":
-                        national_party = "Linke"
-
-
-                    result[entscheidung].append({
-                        "name": nachname,
-                        "vorname": vorname,
-                        "partei": national_party,
-                        "political_group": info["political_group"]
-                    })
-                    gewertete_ids.add(mep_id)
-
-    # Jetzt bestimmen wir alle, die nicht abgestimmt haben
     for mep_id, info in deutsche_meps.items():
         if mep_id not in gewertete_ids:
             national_party = normalize_partei(info["national_political_group"])
-
             parts = info["full_name"].split()
             nachnamen_teile = [teil.capitalize() for teil in parts if teil.isupper()]
             vornamen_teile = [teil.capitalize() for teil in parts if not teil.isupper()]
@@ -404,13 +477,12 @@ def verarbeite_deutsche_abstimmungen(abstimmungen, deutsche_meps, parteireihenfo
                 nachname = "Strack-Zimmermann"  
 
             result['not_voted'].append({
-                        "name": nachname,
-                        "vorname": vorname,
-                        "partei": national_party,
-                        "political_group": info["political_group"]
-                    })
+                "name": nachname,
+                "vorname": vorname,
+                "partei": national_party,
+                "political_group": info["political_group"]
+            })
 
-    # Hilfsfunktion zur Sortierung nach Partei + Alphabet
     def sort_key(mep):
         partei_index = parteireihenfolge.index(mep["partei"]) if mep["partei"] in parteireihenfolge else len(parteireihenfolge)
         return (partei_index, mep["name"].lower())
@@ -418,14 +490,20 @@ def verarbeite_deutsche_abstimmungen(abstimmungen, deutsche_meps, parteireihenfo
     for entscheidung in ["For", "Against", "Abstention", "not_voted"]:
         result[entscheidung].sort(key=sort_key)
 
+    # temp_key und fuzzy_used zurückgeben
+    result['temp_key'] = temp_key
+    result['fuzzy_used'] = fuzzy_used
+
     return result
-def draw_block(img, draw, persons, label, y_offset, icon_color, font, font2, font3, logos):
+
+def draw_block(draw, persons, label, y_offset, icon_color, font, font2, font3, logos):
     draw.rectangle([PADDING, y_offset - 2, PADDING + 10, y_offset + ICON_SIZE ], fill=icon_color)
     draw.text((PADDING + REC_SIZE + 13, y_offset), label, fill=icon_color, font=font2)
     
     #y_offset += LINE_HEIGHT
     persons.insert(0, {'name': '', 'vorname': '', 'partei': ''}) 
     rows = math.ceil(len(persons) / COLUMN_COUNT)
+
 
     for col in range(COLUMN_COUNT):
             for row in range(rows):
@@ -451,10 +529,6 @@ def draw_block(img, draw, persons, label, y_offset, icon_color, font, font2, fon
                     
                     if person['name'] == "Oetjen":
                         name = "Oetjen J.-C."
-
-                    if person['name'] == "Rackete":
-                        person["partei"] = "Linke"
-                        
                 logo = logos.get(person["partei"], None)
 
                 x = PADDING + col * COL_WIDTH
@@ -472,7 +546,6 @@ def draw_block(img, draw, persons, label, y_offset, icon_color, font, font2, fon
                     # Logo
                 if logo:
                     img.paste(logo, (x + REC_SIZE + 250 - logo.width, y), logo)
-                    
 
     return y_offset + rows * LINE_HEIGHT + LINE_HEIGHT
 
@@ -523,44 +596,70 @@ def wrap_text(text, font, max_width, draw):
     return lines
 
 
+def generate_image(data, output_path="sharepic.png"):
+    # Schriftgrößen für Titel und temp_key
+ 
+    size_temp = 28
 
+    font_temp  = ImageFont.load_default()
 
-def generate_image_bytes(data):
-    size4 = 42
-    font = ImageFont.truetype(FONT_PATH, FONT_SIZE)
-    font4 = ImageFont.truetype(FONT2, size4)
-    font2 = ImageFont.truetype(FONT2, round(FONT_SIZE*0.9))
-    font3 = ImageFont.truetype(FONT_PATH, round(FONT_SIZE *0.8))
+    # Blöcke verwenden weiterhin die bisherigen Fonts
+    font_block = ImageFont.truetype(FONT_PATH, FONT_SIZE)
+    font_block2 = ImageFont.truetype(FONT2, round(FONT_SIZE*0.9))
+    font_block3 = ImageFont.truetype(FONT_PATH, round(FONT_SIZE*0.8))
+    font_title = ImageFont.truetype(FONT2, 42)
     logos = load_logos()
 
-    total_people = sum(len(data[k]) for k in ["ja", "nein", "enthaltung"])
-    estimated_height = 1200 
+    estimated_height = 1500
+    global img
     img = Image.new("RGBA", (1200, estimated_height), "white")
     draw = ImageDraw.Draw(img)
 
-    wrapped_lines = wrap_text(data['title'], font4, img.width - 2 * PADDING, draw)
-    y = PADDING 
+    # --- temp_key über dem Bild ---
+    temp_key_text = data.get("temp_key", "")
+    fuzzy = data.get("fuzzy_used", False)
 
-    for line in wrapped_lines:
-        bbox = draw.textbbox((0, 0), line, font=font4)
+    y_offset = 20  # Abstand vom oberen Rand
+
+    if temp_key_text:
+        display_text = f"Selected vote: {temp_key_text}"
+        fill_color = "red" if fuzzy else "black"
+        if fuzzy:
+            display_text += " (Please double check, whether the program chose the right title)"
+
+
+    wrapped_temp = wrap_text(display_text, font_temp, img.width - 2 * 20, draw)
+    for line in wrapped_temp:
+        bbox = draw.textbbox((0,0), line, font=font_temp)
         line_width = bbox[2] - bbox[0]
-        x1 = (img.width - line_width) // 2
-        draw.text((x1, y), line, fill="black", font=font4)
-        y += LINE_HEIGHT + round(size4 / 4)
+        x = (img.width - line_width) // 2  # zentriert
+        draw.text((x, y_offset), line, fill=fill_color, font=font_temp)
+        y_offset += 30  # Zeilenhöhe
 
-    y = (PADDING + round(size4 / 2.8)) * len(wrapped_lines) + LINE_HEIGHT * 2 
-    y = draw_block(img, draw, data["ja"], "DAFÜR", y, COLOR_MAP["ja"], font, font2, font3, logos)
-    y = draw_block(img, draw, data["nein"], "DAGEGEN", y, COLOR_MAP["nein"], font, font2, font3, logos)
-    y = draw_block(img, draw, data["enthaltung"], "ENTHALTEN", y, COLOR_MAP["enthaltung"], font, font2, font3, logos)
-    y = draw_block(img, draw, data["nicht_abgestimmt"], "NICHT ABGESTIMMT", y, COLOR_MAP["nicht_abgestimmt"], font, font2, font3, logos)
 
-    img = img.crop((0, 0, img.width, y + 2 * LINE_HEIGHT))  # Bild kürzen
+    # --- Überschrift des Bildes ---
+    title = data.get("title", "")
+    wrapped_lines = wrap_text(title, font_title, img.width - 2 * 20, draw)
+    y = y_offset + 20  # Abstand zum temp_key-Text
+    for line in wrapped_lines:
+        bbox = draw.textbbox((0, 0), line, font=font_title)
+        line_width = bbox[2] - bbox[0]
+        x = (img.width - line_width) // 2
+        draw.text((x, y), line, fill="black", font=font_title)  # Titel in Standard-Font (kann kursiv simuliert werden)
+        y += 35  # Zeilenhöhe
 
-    # 📌 Bild als Bytes zurückgeben:
-    buffer = BytesIO()
-    img.save(buffer, format="PNG")
-    buffer.seek(0)
-    return buffer
+    y += 20  # Extra Abstand zwischen Titel und Blöcken
+
+    # --- Blöcke zeichnen ---
+    y = draw_block(draw, data["ja"], "DAFÜR", y, COLOR_MAP["ja"], font_block, font_block2, font_block3, logos)
+    y = draw_block(draw, data["nein"], "DAGEGEN", y, COLOR_MAP["nein"], font_block, font_block2, font_block3, logos)
+    y = draw_block(draw, data["enthaltung"], "ENTHALTEN", y, COLOR_MAP["enthaltung"], font_block, font_block2, font_block3, logos)
+    y = draw_block(draw, data["nicht_abgestimmt"], "NICHT ABGESTIMMT", y, COLOR_MAP["nicht_abgestimmt"], font_block, font_block2, font_block3, logos)
+
+    img = img.crop((0, 0, img.width, y + 50))  # Bild kürzen
+    img.save(output_path)
+
+
 
 
 def übersetze_keys(abstimmungs_dict):
@@ -576,22 +675,53 @@ def übersetze_keys(abstimmungs_dict):
         key_mapping.get(k, k): v for k, v in abstimmungs_dict.items()
     }
 
+def parse_inhaltsverzeichnis_from_xml(xml_url):
+    """
+    Liest alle Abstimmungstitel (description texts) aus der XML-Datei
+    und gibt sie als geordnetes Inhaltsverzeichnis zurück.
+    """
+
+    response = requests.get(xml_url)
+    response.raise_for_status()
+    xml_content = response.content
+    root = ET.fromstring(xml_content)
+
+    inhaltsverzeichnis = []
+    for vote in root.findall(".//RollCallVote.Result"):
+        description = vote.findtext("RollCallVote.Description.Text")
+        if description:
+            description = description.strip()
+            inhaltsverzeichnis.append(description)
+
+    return inhaltsverzeichnis
+
 def process_abstimmung(punkt, tag, titel):
+    # Holt Daten
     xml_link = pdf_finden(url, tag)[1]
     vote_results = parse_vote_results_from_url(xml_link)
     mep_link = "https://www.europarl.europa.eu/meps/de/download/advanced/xml?countryCode=DE"
     mep_dict = parse_meps_from_url(mep_link)
 
     s = re.sub(r'^\d+\.\d+\s+', '', punkt)
+
     ergebnis = verarbeite_deutsche_abstimmungen(
         abstimmungen=vote_results,
         deutsche_meps=mep_dict,
         parteireihenfolge=parteireihenfolge,
-        punkt = s.strip(),
+        punkt=s.strip(),
         abstimmungstitel=titel.strip()
     )
+
     auswertung = übersetze_keys(ergebnis)
 
-    # Rückgabe als Byte-Stream statt Dateipfad
-    return generate_image_bytes(auswertung)
+    # temp_key und fuzzy_used ebenfalls weitergeben
+    auswertung['temp_key'] = ergebnis['temp_key']
+    auswertung['fuzzy_used'] = ergebnis['fuzzy_used']
 
+    # Bild erzeugen
+    generate_image(auswertung, "sharepic.png")
+    return "sharepic.png"
+
+    
+
+    
