@@ -1,7 +1,7 @@
 from fastapi import FastAPI, UploadFile, Response, Request, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
-from logic import *
+#from logic import *
 from pydantic import BaseModel
 import uvicorn
 import asyncio
@@ -86,7 +86,7 @@ async def process_bild_async(punkt, tag, titel):
 @app.get("/ping")
 async def ping():
     return {"message": "pong"}
-
+'''
 @app.get("/wochen")
 async def get_wochen():
     url = 'https://www.europarl.europa.eu/plenary/en/votes.html?tab=votes#banner_session_live'
@@ -117,6 +117,8 @@ async def bild_generieren(body: BildRequest):
     if not img_path:
         raise HTTPException(status_code=404, detail="Bild konnte nicht generiert werden")
     return FileResponse(img_path, media_type="image/png")
+
+'''
 
 # -----------------------------
 # Server starten
