@@ -669,7 +669,7 @@ def generate_image(data, output_path="sharepic.png"):
     img = img.crop((0, 0, img.width, y + 50))  # Bild kürzen
 
     small_logo = load_small_logo()
-    logo_x = img.width - small_logo.width - 40  # 20 px Abstand zum rechten Rand
+    logo_x = img.width - small_logo.width - 80  # 20 px Abstand zum rechten Rand
     logo_y = img.height - small_logo.height - 10  # 20 px Abstand zum unteren Rand
 
     img.paste(small_logo, (logo_x, logo_y), small_logo)
