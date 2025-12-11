@@ -1,11 +1,4 @@
-from fastapi import FastAPI
-app = FastAPI()
-print("main.py wird geladen")
-@app.get("/ping")
-async def ping():
-    return {"message": "pong"}
 
-'''
 from fastapi import FastAPI, UploadFile, Response, Request, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
@@ -126,7 +119,7 @@ async def bild_generieren(body: BildRequest):
         raise HTTPException(status_code=404, detail="Bild konnte nicht generiert werden")
     return FileResponse(img_path, media_type="image/png")
 
-'''
+
 
 # -----------------------------
 # Server starten
