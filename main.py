@@ -2,7 +2,7 @@
 from fastapi import FastAPI, UploadFile, Response, Request, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
-#from logic import *
+from logic import *
 from pydantic import BaseModel
 import uvicorn
 import asyncio
