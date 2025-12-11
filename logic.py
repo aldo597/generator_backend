@@ -595,6 +595,16 @@ def wrap_text(text, font, max_width, draw):
 
     return lines
 
+def load_small_logo():
+    logo_path = os.path.join(BASE_DIR, "logos", "GreensEFA.png")
+    logo = Image.open(logo_path).convert("RGBA")
+    # Optional: verkleinern
+    max_width = 100  # gewünschte maximale Breite
+    aspect_ratio = logo.width / logo.height
+    new_width = min(logo.width, max_width)
+    new_height = int(new_width / aspect_ratio)
+    logo = logo.resize((new_width, new_height), Image.LANCZOS)
+    return logo
 
 def generate_image(data, output_path="sharepic.png"):
     # Schriftgrößen für Titel und temp_key
@@ -657,6 +667,12 @@ def generate_image(data, output_path="sharepic.png"):
     y = draw_block(draw, data["nicht_abgestimmt"], "NICHT ABGESTIMMT", y, COLOR_MAP["nicht_abgestimmt"], font_block, font_block2, font_block3, logos)
 
     img = img.crop((0, 0, img.width, y + 50))  # Bild kürzen
+
+    small_logo = load_small_logo()
+    logo_x = img.width - small_logo.width - 20  # 20 px Abstand zum rechten Rand
+    logo_y = img.height - small_logo.height - 20  # 20 px Abstand zum unteren Rand
+
+    img.paste(small_logo, (logo_x, logo_y), small_logo)
     img.save(output_path)
 
 
