@@ -599,7 +599,7 @@ def load_small_logo():
     logo_path = os.path.join(BASE_DIR, "logos", "GreensEFA.png")
     logo = Image.open(logo_path).convert("RGBA")
     # Optional: verkleinern
-    max_width = 100  # gewünschte maximale Breite
+    max_width = 80  # gewünschte maximale Breite
     aspect_ratio = logo.width / logo.height
     new_width = min(logo.width, max_width)
     new_height = int(new_width / aspect_ratio)
@@ -669,8 +669,8 @@ def generate_image(data, output_path="sharepic.png"):
     img = img.crop((0, 0, img.width, y + 50))  # Bild kürzen
 
     small_logo = load_small_logo()
-    logo_x = img.width - small_logo.width - 20  # 20 px Abstand zum rechten Rand
-    logo_y = img.height - small_logo.height - 20  # 20 px Abstand zum unteren Rand
+    logo_x = img.width - small_logo.width - 40  # 20 px Abstand zum rechten Rand
+    logo_y = img.height - small_logo.height - 10  # 20 px Abstand zum unteren Rand
 
     img.paste(small_logo, (logo_x, logo_y), small_logo)
     img.save(output_path)
