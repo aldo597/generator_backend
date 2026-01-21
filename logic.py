@@ -118,22 +118,25 @@ def get_weeks_from_text(text):
 
 
 def tage_ausgeben(ausgewaehlte_woche, text):
-        pattern = re.compile(
-            re.escape(ausgewaehlte_woche) + r"\n(Strasbourg|Brussels)\n(.*?)(?=\n(?:Monday|Tuesday|Wednesday|Thursday|Friday))",
-            re.DOTALL
-        )
+    pattern = re.compile(
+        re.escape(ausgewaehlte_woche)
+        + r"\n(Strasbourg|Brussels)\n(.*?)(?=\n(?:Monday|Tuesday|Wednesday|Thursday|Friday), \d{1,2} \w+ \d{4} -|$)",
+        re.DOTALL
+    )
 
-        match = pattern.search(text)
+    match = pattern.search(text)
 
-        if match:
-            wocheninhalt = match.group(2)  # Das Textstück, das nur zu dieser Woche gehört
+    if not match:
+        print("Woche nicht gefunden.")
+        return []
 
-            # Finde alle Einzeltage in diesem Block
-            tage = re.findall(r"(Monday|Tuesday|Wednesday|Thursday|Friday), \d{1,2} \w+ \d{4}", wocheninhalt)
-            tage_mit_datum = re.findall(r"(?:Monday|Tuesday|Wednesday|Thursday|Friday), \d{1,2} \w+ \d{4}", wocheninhalt)
-            return tage_mit_datum
-        else:
-            print("Woche nicht gefunden oder Format stimmt nicht.")
+    wocheninhalt = match.group(2)
+
+    return re.findall(
+        r"(?:Monday|Tuesday|Wednesday|Thursday|Friday), \d{1,2} \w+ \d{4}",
+        wocheninhalt
+    )
+
         
 '''
 def tage_ausgeben(ausgewaehlte_woche, text):
