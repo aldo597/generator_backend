@@ -118,22 +118,28 @@ def get_weeks_from_text(text):
 
 
 def tage_ausgeben(ausgewaehlte_woche, text):
-        pattern = re.compile(
-            re.escape(ausgewaehlte_woche) + r"\n(Strasbourg|Brussels)\n(.*?)(?=\n(?:Monday|Tuesday|Wednesday|Thursday|Friday))",
-            re.DOTALL
+    # Muster: finde den Textabschnitt für die ausgewählte Woche + Ort
+    pattern = re.compile(
+        re.escape(ausgewaehlte_woche) + r"\n(Strasbourg|Brussels)\n(.*?)(?=\n(?:Monday|Tuesday|Wednesday|Thursday|Friday), \d{1,2} \w+ \d{4}|$)",
+        re.DOTALL
+    )
+
+    match = pattern.search(text)
+
+    if match:
+        wocheninhalt = match.group(2)  # Textblock dieser Woche
+
+        # Alle Einzeltage mit Datum (z.B. "Tuesday, 16 December 2025") finden
+        tage_mit_datum = re.findall(
+            r"(?:Monday|Tuesday|Wednesday|Thursday|Friday), \d{1,2} \w+ \d{4}",
+            wocheninhalt
         )
 
-        match = pattern.search(text)
+        return tage_mit_datum
+    else:
+        print("Woche nicht gefunden.")
+        return []
 
-        if match:
-            wocheninhalt = match.group(2)  # Das Textstück, das nur zu dieser Woche gehört
-
-            # Finde alle Einzeltage in diesem Block
-            tage = re.findall(r"(Monday|Tuesday|Wednesday|Thursday|Friday), \d{1,2} \w+ \d{4}", wocheninhalt)
-            tage_mit_datum = re.findall(r"(Monday|Tuesday|Wednesday|Thursday|Friday), \d{1,2} \w+ \d{4}", wocheninhalt)
-            return tage_mit_datum
-        else:
-            print("Woche nicht gefunden oder Format stimmt nicht.")
         
 '''
 def tage_ausgeben(ausgewaehlte_woche, text):
