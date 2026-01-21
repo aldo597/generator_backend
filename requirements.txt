@@ -7,4 +7,9 @@ beautifulsoup4
 lxml
 pydantic
 python-multipart
+requests
+beautifulsoup4
+pdfplumber
+Pillow
+SequenceMatcher
 httpx
