@@ -115,7 +115,6 @@ def get_weeks_from_text(text):
     wochen = pattern.findall(text)
 
     return wochen
-'''
 
 def tage_ausgeben(ausgewaehlte_woche, text):
     pattern = re.compile(
@@ -163,6 +162,7 @@ def tage_ausgeben(ausgewaehlte_woche, text):
         print("Woche nicht gefunden.")
         return []
         print("Woche nicht gefunden oder Format stimmt nicht.")
+'''
 
         
 def pdf_finden(url, gesuchtes_datum):
