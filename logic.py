@@ -701,8 +701,12 @@ def parse_inhaltsverzeichnis_from_xml(xml_url):
     return inhaltsverzeichnis
 
 def process_abstimmung(punkt, tag, titel):
-    # Holt Daten
-    xml_link = pdf_finden(url, tag)[1]
+    result = pdf_finden(url, tag)
+    if not result:
+        return {"error": f"Kein PDF/XML gefunden für {tag}"}
+
+    pdf_link, xml_link = result
+
     vote_results = parse_vote_results_from_url(xml_link)
     mep_link = "https://www.europarl.europa.eu/meps/de/download/advanced/xml?countryCode=DE"
     mep_dict = parse_meps_from_url(mep_link)
@@ -719,13 +723,16 @@ def process_abstimmung(punkt, tag, titel):
 
     auswertung = übersetze_keys(ergebnis)
 
-    # temp_key und fuzzy_used ebenfalls weitergeben
     auswertung['temp_key'] = ergebnis['temp_key']
     auswertung['fuzzy_used'] = ergebnis['fuzzy_used']
 
-    # Bild erzeugen
+    # Safe: wenn Keys fehlen, Default nutzen
+    for k in ["ja", "nein", "enthaltung", "nicht_abgestimmt"]:
+        auswertung.setdefault(k, [])
+
     generate_image(auswertung, "sharepic.png")
     return "sharepic.png"
+
 
     
 
