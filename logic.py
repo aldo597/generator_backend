@@ -130,11 +130,12 @@ def tage_ausgeben(ausgewaehlte_woche, text):
 
             # Finde alle Einzeltage in diesem Block
             tage = re.findall(r"(Monday|Tuesday|Wednesday|Thursday|Friday), \d{1,2} \w+ \d{4}", wocheninhalt)
-
-            return tage
+            tage_mit_datum = re.findall(r"(?:Monday|Tuesday|Wednesday|Thursday|Friday), \d{1,2} \w+ \d{4}",wocheninhalt)
+            return tage_mit_datum
         else:
             print("Woche nicht gefunden oder Format stimmt nicht.")
-
+        
+'''
 def tage_ausgeben(ausgewaehlte_woche, text):
     print("Suche nach Woche:", text)
     # Muster: finde den Textabschnitt für die ausgewählte Woche + Ort
@@ -159,7 +160,8 @@ def tage_ausgeben(ausgewaehlte_woche, text):
         print("Woche nicht gefunden.")
         return []
         print("Woche nicht gefunden oder Format stimmt nicht.")
-
+'''
+        
 def pdf_finden(url, gesuchtes_datum):
     # Seite laden und parsen
     response = requests.get(url)
