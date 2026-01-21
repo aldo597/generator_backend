@@ -11,5 +11,4 @@ requests
 beautifulsoup4
 pdfplumber
 Pillow
-SequenceMatcher
 httpx
