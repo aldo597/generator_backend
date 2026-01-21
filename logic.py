@@ -130,7 +130,7 @@ def tage_ausgeben(ausgewaehlte_woche, text):
 
             # Finde alle Einzeltage in diesem Block
             tage = re.findall(r"(Monday|Tuesday|Wednesday|Thursday|Friday), \d{1,2} \w+ \d{4}", wocheninhalt)
-            tage_mit_datum = re.findall(r"(Monday|Tuesday|Wednesday|Thursday|Friday), \d{1,2} \w+ \d{4}", wocheninhalt)
+            tage_mit_datum = re.findall(r"(?:Monday|Tuesday|Wednesday|Thursday|Friday), \d{1,2} \w+ \d{4}", wocheninhalt)
             return tage_mit_datum
         else:
             print("Woche nicht gefunden oder Format stimmt nicht.")
