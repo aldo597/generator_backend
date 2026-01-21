@@ -120,7 +120,7 @@ def get_weeks_from_text(text):
 def tage_ausgeben(ausgewaehlte_woche, text):
         pattern = re.compile(
             re.escape(ausgewaehlte_woche) + r"\n(Strasbourg|Brussels)\n(.*?)(?=\n(?:Monday|Tuesday|Wednesday|Thursday|Friday))",
-            re.DOTALLxx
+            re.DOTALL
         )
 
         match = pattern.search(text)
