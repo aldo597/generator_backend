@@ -603,10 +603,11 @@ def generate_image(data, output_path="sharepic.png"):
     draw = ImageDraw.Draw(img)
 
     # --- temp_key über dem Bild ---
+    y_offset = 20  # Abstand vom oberen Rand
+    '''
     temp_key_text = data.get("temp_key", "")
     fuzzy = data.get("fuzzy_used", False)
 
-    y_offset = 20  # Abstand vom oberen Rand
 
     if temp_key_text:
         display_text = f"Selected vote: {temp_key_text}"
@@ -622,6 +623,7 @@ def generate_image(data, output_path="sharepic.png"):
         x = (img.width - line_width) // 2  # zentriert
         draw.text((x, y_offset), line, fill=fill_color, font=font_temp)
         y_offset += 30  # Zeilenhöhe
+    '''
 
 
     # --- Überschrift des Bildes ---
