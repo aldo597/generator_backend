@@ -12,6 +12,7 @@ from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 import random
 from difflib import SequenceMatcher
+import traceback
 
 
 
@@ -730,8 +731,13 @@ def process_abstimmung(punkt, tag, titel):
     for k in ["ja", "nein", "enthaltung", "nicht_abgestimmt"]:
         auswertung.setdefault(k, [])
 
-    generate_image(auswertung, "sharepic.png")
-    return "sharepic.png"
+
+    try:
+        generate_image(auswertung, "sharepic.png")
+    except Exception as e:
+        print(traceback.format_exc())
+        return {"error": str(e)}
+
 
 
     
