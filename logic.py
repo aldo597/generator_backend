@@ -138,32 +138,6 @@ def tage_ausgeben(ausgewaehlte_woche, text):
     )
 
         
-'''
-def tage_ausgeben(ausgewaehlte_woche, text):
-    print("Suche nach Woche:", text)
-    # Muster: finde den Textabschnitt für die ausgewählte Woche + Ort
-    pattern = re.compile(
-        re.escape(ausgewaehlte_woche) + r"\n(Strasbourg|Brussels)\n(.*?)(?=\n(?:Monday|Tuesday|Wednesday|Thursday|Friday), \d{1,2} \w+ \d{4} -|$)",
-        re.DOTALL
-    )
-
-    match = pattern.search(text)
-
-    if match:
-        wocheninhalt = match.group(2)  # Textblock dieser Woche
-
-        # Alle Einzeltage mit Datum (z.B. "Thursday, 13 March 2025") finden
-        tage = re.findall(r"(Monday|Tuesday|Wednesday|Thursday|Friday), \d{1,2} \w+ \d{4}", wocheninhalt)
-        
-        # Das vorherige findall gibt nur die Wochentage zurück, wir ändern die Regex:
-        tage_mit_datum = re.findall(r"(?:Monday|Tuesday|Wednesday|Thursday|Friday), \d{1,2} \w+ ", wocheninhalt)
-
-        return tage_mit_datum
-    else:
-        print("Woche nicht gefunden.")
-        return []
-        print("Woche nicht gefunden oder Format stimmt nicht.")
-'''
 
         
 def pdf_finden(url, gesuchtes_datum):
@@ -709,11 +683,15 @@ def parse_inhaltsverzeichnis_from_xml(xml_url):
     return inhaltsverzeichnis
 
 def process_abstimmung(punkt, tag, titel):
+    print(f"=== START process_abstimmung ===")
+    print(f"punkt: {punkt}, tag: {tag}, titel: {titel}")
+    
     result = pdf_finden(url, tag)
     if not result:
         return {"error": f"Kein PDF/XML gefunden für {tag}"}
 
     pdf_link, xml_link = result
+    print(f"PDF/XML gefunden: {pdf_link}, {xml_link}")
 
     vote_results = parse_vote_results_from_url(xml_link)
     mep_link = "https://www.europarl.europa.eu/meps/de/download/advanced/xml?countryCode=DE"
@@ -728,20 +706,21 @@ def process_abstimmung(punkt, tag, titel):
         punkt=s.strip(),
         abstimmungstitel=titel.strip()
     )
+    print(f"Abstimmung verarbeitet")
 
     auswertung = übersetze_keys(ergebnis)
-
-    auswertung['temp_key'] = ergebnis['temp_key']
-    auswertung['fuzzy_used'] = ergebnis['fuzzy_used']
-
-    # Safe: wenn Keys fehlen, Default nutzen
-    for k in ["ja", "nein", "enthaltung", "nicht_abgestimmt"]:
-        auswertung.setdefault(k, [])
-
-
+    # ...
+    
+    print(f"Starte generate_image...")
+    print(f"FONT_PATH existiert: {os.path.exists(FONT_PATH)}")
+    print(f"FONT2 existiert: {os.path.exists(FONT2)}")
+    print(f"LOGO_PATH existiert: {os.path.exists(LOGO_PATH)}")
+    
     try:
         generate_image(auswertung, "sharepic.png")
+        print(f"✅ Bild erfolgreich generiert")
     except Exception as e:
+        print(f"❌ FEHLER bei generate_image:")
         print(traceback.format_exc())
         return {"error": str(e)}
 
