@@ -658,7 +658,7 @@ def generate_image(data, output_path="sharepic.png"):
         
         # Position: unten rechts mit 20px Abstand
         x_pos = img.width - logo_width - 80
-        y_pos = img.height - logo_height - 20
+        y_pos = img.height - logo_height - 18
         
         img.paste(bottom_logo, (x_pos, y_pos), bottom_logo)
 
