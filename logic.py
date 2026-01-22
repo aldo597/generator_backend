@@ -646,6 +646,24 @@ def generate_image(data, output_path="sharepic.png"):
     y = draw_block(draw, data["nicht_abgestimmt"], "NICHT ABGESTIMMT", y, COLOR_MAP["nicht_abgestimmt"], font_block, font_block2, font_block3, logos)
 
     img = img.crop((0, 0, img.width, y + 50))  # Bild kürzen
+    logo_path = os.path.join(LOGO_PATH, "GreensEFA.png")
+    if os.path.exists(logo_path):
+        bottom_logo = Image.open(logo_path).convert("RGBA")
+        
+        # Größe anpassen (z.B. 100px breit)
+        logo_width = 100
+        aspect_ratio = bottom_logo.height / bottom_logo.width
+        logo_height = int(logo_width * aspect_ratio)
+        bottom_logo = bottom_logo.resize((logo_width, logo_height), Image.LANCZOS)
+        
+        # Position: unten rechts mit 20px Abstand
+        x_pos = img.width - logo_width - 80
+        y_pos = img.height - logo_height - 20
+        
+        img.paste(bottom_logo, (x_pos, y_pos), bottom_logo)
+
+
+    
     img.save(output_path)
 
 
