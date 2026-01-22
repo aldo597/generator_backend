@@ -607,13 +607,20 @@ def generate_image(data, output_path="sharepic.png"):
  
     size_temp = 28
 
-    font_temp  = ImageFont.load_default()
+    font_temp = ImageFont.truetype(FONT_PATH, size_temp)
 
     # Blöcke verwenden weiterhin die bisherigen Fonts
-    font_block = ImageFont.truetype(FONT_PATH, FONT_SIZE)
-    font_block2 = ImageFont.truetype(FONT2, round(FONT_SIZE*0.9))
-    font_block3 = ImageFont.truetype(FONT_PATH, round(FONT_SIZE*0.8))
-    font_title = ImageFont.truetype(FONT2, 42)
+    try:
+        font_temp = ImageFont.truetype(FONT_PATH, 28)
+        font_block = ImageFont.truetype(FONT_PATH, FONT_SIZE)
+        font_block2 = ImageFont.truetype(FONT2, round(FONT_SIZE*0.9))
+        font_block3 = ImageFont.truetype(FONT_PATH, round(FONT_SIZE*0.8))
+        font_title = ImageFont.truetype(FONT2, 42)
+    except Exception as e:
+        print(f"Font loading error: {e}")
+        print(f"BASE_DIR: {BASE_DIR}")
+        print(f"FONT_PATH exists: {os.path.exists(FONT_PATH)}")
+        raise
     logos = load_logos()
 
     estimated_height = 1500
