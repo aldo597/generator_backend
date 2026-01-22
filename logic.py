@@ -683,16 +683,8 @@ def parse_inhaltsverzeichnis_from_xml(xml_url):
     return inhaltsverzeichnis
 
 def process_abstimmung(punkt, tag, titel):
-    print(f"=== START process_abstimmung ===")
-    print(f"punkt: {punkt}, tag: {tag}, titel: {titel}")
-    
-    result = pdf_finden(url, tag)
-    if not result:
-        return {"error": f"Kein PDF/XML gefunden für {tag}"}
-
-    pdf_link, xml_link = result
-    print(f"PDF/XML gefunden: {pdf_link}, {xml_link}")
-
+    # Holt Daten
+    xml_link = pdf_finden(url, tag)[1]
     vote_results = parse_vote_results_from_url(xml_link)
     mep_link = "https://www.europarl.europa.eu/meps/de/download/advanced/xml?countryCode=DE"
     mep_dict = parse_meps_from_url(mep_link)
@@ -706,23 +698,16 @@ def process_abstimmung(punkt, tag, titel):
         punkt=s.strip(),
         abstimmungstitel=titel.strip()
     )
-    print(f"Abstimmung verarbeitet")
 
     auswertung = übersetze_keys(ergebnis)
-    # ...
-    
-    print(f"Starte generate_image...")
-    print(f"FONT_PATH existiert: {os.path.exists(FONT_PATH)}")
-    print(f"FONT2 existiert: {os.path.exists(FONT2)}")
-    print(f"LOGO_PATH existiert: {os.path.exists(LOGO_PATH)}")
-    
-    try:
-        generate_image(auswertung, "sharepic.png")
-        print(f"✅ Bild erfolgreich generiert")
-    except Exception as e:
-        print(f"❌ FEHLER bei generate_image:")
-        print(traceback.format_exc())
-        return {"error": str(e)}
+
+    # temp_key und fuzzy_used ebenfalls weitergeben
+    auswertung['temp_key'] = ergebnis['temp_key']
+    auswertung['fuzzy_used'] = ergebnis['fuzzy_used']
+
+    # Bild erzeugen
+    generate_image(auswertung, "sharepic.png")
+    return "sharepic.png"
 
 
 
